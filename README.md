@@ -2,10 +2,10 @@ TennoStore
 Proyecto Full Stack para la venta de videojuegos, especializado en seguimiento de precios y reservas inteligente de stack
 
 ## TECNOLOGIAS ##
--Frontend
--Backend
--Base de datos
--Despliegue
+-Frontend: React + Vote
+-Backend: Node.js + Express(API REST)
+-Base de datos: PostgreSQL
+-Despliegue: Docker + Docker Compose
 
 ## EJECUCIÓN DEL PROYECTO ##
 1.-Clonación del repositorio
