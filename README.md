@@ -53,4 +53,4 @@ Una vez que el proyecto esté corriendo, puedes acceder a los servicios en las s
 
 * **Frontend (Aplicación Web):** [http://localhost](http://localhost)
 * **Backend (API REST):** [http://localhost:3000](http://localhost:3000)
-* **Base de datos (PostgreSQL):** `localhost:5433` 👈 *(Cambiado a 5433 para evitar conflictos si tienes un PostgreSQL local en tu equipo)*.
+* **Base de datos (PostgreSQL):** `localhost:5433` <-- *(Fue cambiado a 5433 por porblemas que se generaban en mi equipo por una incompatibilidad)*.
