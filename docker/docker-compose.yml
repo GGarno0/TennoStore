@@ -1,5 +1,4 @@
 # docker-compose.yml
-version: '3.8'
 
 services:
   # Base de Datos PostgreSQL
@@ -10,9 +9,9 @@ services:
     networks:
       - tennostore_net
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: tennostore_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5433:5432"
     volumes:
@@ -27,11 +26,11 @@ services:
     networks:
       - tennostore_net
     environment:
-      DB_HOST: db
-      DB_USER: admin
-      DB_PASS: admin
-      DB_NAME: tennostore_db
-      JWT_SECRET: super_secret_key
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "3000:3000"
     depends_on:
@@ -47,7 +46,7 @@ services:
     ports:
       - "80:80"
     environment:
-      VITE_API_URL: http://localhost:3000
+      VITE_API_URL: ${VITE_API_URL}
 
 # Definición de la red interna (Bridge)
 networks:

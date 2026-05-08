@@ -2,8 +2,7 @@
 echo ===========================================
 echo Deteniendo el proyecto TennoStore...
 echo ===========================================
-cd docker
-docker compose stop
+docker compose --env-file .env -f docker/docker-compose.yml stop
 echo ===========================================
 echo ¡Proyecto detenido correctamente!
 echo ===========================================

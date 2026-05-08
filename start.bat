@@ -2,8 +2,7 @@
 echo ===========================================
 echo Arrancando el proyecto TennoStore...
 echo ===========================================
-cd docker
-docker compose up -d --build
+docker compose --env-file .env -f docker/docker-compose.yml up -d --build
 echo ===========================================
 echo ¡Proyecto arrancado con éxito!
 echo Accede al Frontend en: http://localhost
