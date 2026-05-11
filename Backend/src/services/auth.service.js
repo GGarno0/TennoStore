@@ -36,7 +36,13 @@ const loginUser = async (username, password) => {
   return { token, user: { id: user.id, username: user.username, is_admin: user.is_admin } };
 };
 
+const getUserById = async (id) => {
+  const result = await pool.query('SELECT id, username, is_admin FROM users WHERE id = $1', [id]);
+  return result.rows[0];
+};
+
 module.exports = {
   registerUser,
-  loginUser
+  loginUser,
+  getUserById
 };

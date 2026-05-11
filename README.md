@@ -1,42 +1,50 @@
-# TennoStore
+# TennoStore - E-Commerce de Videojuegos
+## Proyecto Full Stack con Seguridad y Arquitectura de Capas
 
-Proyecto Full Stack para la venta de videojuegos, especializado en seguimiento de precios y reservas inteligente de stock.
+**TennoStore** es una plataforma profesional para la venta de videojuegos, diseñada con un enfoque en la seguridad, la gestión de inventario en tiempo real y la visualización de datos históricos.
 
-## Tecnologías Utilizadas
+---
 
-* **Frontend:** React + Vite
-* **Backend:** Node.js + Express (API REST)
-* **Base de datos:** PostgreSQL 15 (Con esquema inicializado automáticamente)
-* **Despliegue y Orquestación:** Docker + Docker Compose
+## 🛠️ Arquitectura del Sistema
+El proyecto ha sido estructurado siguiendo el patrón de **Arquitectura en Capas**, lo que permite una clara separación de responsabilidades:
 
-## Estructura del Proyecto
+*   **Frontend (React + Vite):** Interfaz SPA moderna, reactiva y segura.
+*   **Backend (Node.js + Express):** API REST robusta organizada en:
+    *   **Rutas:** Definición de puntos de entrada y aplicación de seguridad.
+    *   **Controladores:** Gestión de peticiones/respuestas y validación de datos (Joi).
+    *   **Servicios:** Lógica de negocio pura e interacción con la base de datos (PostgreSQL).
+    *   **Middlewares:** Filtros de seguridad (JWT) y autorización por roles.
+*   **Infraestructura (Docker):** Orquestación mediante Docker Compose para asegurar un entorno de desarrollo idéntico al de producción.
 
-* **/Frontend**: Interfaz de usuario (React y Tailwind CSS).
-* **/Backend**: API REST, conexión con base de datos y lógica de negocio.
-* **/docker**: Configuración de los contenedores de Docker e inicialización de la base de datos (`init.sql`).
+---
 
-## Cómo Arrancar el Proyecto
+## 🔐 Seguridad y Protección de Datos
+Se han implementado las siguientes medidas para cumplir con los estándares de seguridad:
 
-**Paso Previo (Configuración):**
-Copia el archivo `.env.example`, renómbralo como `.env` y configura tus variables locales si es necesario.
+1.  **Autenticación JWT:** Sesiones seguras mediante tokens firmados.
+2.  **Encriptación Bcrypt:** Las contraseñas se almacenan únicamente como hashes salteados (10 rondas).
+3.  **RBAC (Role-Based Access Control):** Diferenciación estricta entre usuarios y administradores.
+4.  **Sanitización de Salida:** Los datos sensibles (hashes de contraseñas) se eliminan de las respuestas de la API.
+5.  **Gestión de Secretos:** Eliminación total de credenciales hardcodeadas; uso exclusivo de variables de entorno `.env`.
 
-1. **Clona el repositorio**
-   ```bash
-   git clone https://github.com/GGarno0/TennoStore
-   cd TennoStore
-   ```
+---
 
-2. **Levanta los contenedores con Docker(Todo desde la capeta TennoStore)**
-   ```bash
-   docker compose --env-file .env -f docker/docker-compose.yml up -d --build
-   ```
+## 🚀 Cómo Arrancar el Proyecto
 
-* Hay dos scripts creados para facilitar el arranque y la detención del proyecto los cuales son: (`start.bat`), (`stop.bat`)
+1.  **Configuración:** 
+    Copie el archivo `docker/.env.example` a `docker/.env` y ajuste el `JWT_SECRET`.
+2.  **Despliegue:** 
+    Desde la raíz del proyecto, ejecute:
+    ```bash
+    docker compose --env-file docker/.env -f docker/docker-compose.yml up -d --build
+    ```
+    *(O utilice los scripts facilitados `start.bat` / `stop.bat`)*.
 
-## Visualización y Puertos
+3.  **Credenciales de Prueba:**
+    *   **Administrador:** `admin` / `admin123`
+    *   **Usuario:** `user` / `user123`
 
-Una vez que el proyecto esté corriendo, puedes acceder a los servicios en las siguientes direcciones:
+---
 
-* **Frontend (Aplicación Web):** [http://localhost](http://localhost)
-* **Backend (API REST):** [http://localhost:3000](http://localhost:3000)
-* **Base de datos (PostgreSQL):** `localhost:5433` <-- *(Fue cambiado a 5433 por problemas que se generaban en mi equipo por una incompatibilidad)*.
+## 📄 Documentación Operativa
+Para ver una guía detallada de las operaciones y pruebas de auditoría de seguridad, consulte el archivo [OPERACIONES.md](./OPERACIONES.md).

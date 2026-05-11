@@ -8,6 +8,29 @@ const AdminPanel = ({ token, API_URL, onGoBack }) => {
   const [formData, setFormData] = useState({ id: null, titulo: '', precio: '', stock: '', categoria: '', imagen_url: '' });
   const [message, setMessage] = useState('');
 
+  // Defensa en profundidad: Verificar si es admin antes de renderizar nada (RF11)
+  const isAdmin = () => {
+    if (!token) return false;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.is_admin === true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  if (!isAdmin()) {
+    return (
+      <div className="bg-red-900/20 border border-red-800 p-8 rounded-2xl text-center">
+        <h2 className="text-2xl font-bold text-red-400 mb-4">Acceso Denegado</h2>
+        <p className="text-gray-300">No tienes permisos para acceder a esta sección.</p>
+        <button onClick={onGoBack} className="mt-6 bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-xl transition-colors">
+          Volver a la Tienda
+        </button>
+      </div>
+    );
+  }
+
   const fetchGames = () => {
     setLoading(true);
     fetch(`${API_URL}/api/games`)

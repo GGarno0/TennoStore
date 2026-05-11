@@ -4,14 +4,17 @@ const CartModal = ({ isOpen, onClose, cart, onRemoveFromCart, onUpdateQuantity, 
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
-    if (!isOpen || cart.length === 0) return;
+    if (!isOpen) return;
+
+    // Actualizar 'now' inmediatamente al abrir para evitar desfases
+    setNow(Date.now());
 
     const timer = setInterval(() => {
       setNow(Date.now());
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isOpen, cart.length]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

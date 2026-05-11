@@ -1,9 +1,23 @@
 @echo off
+setlocal
+title TennoStore Stopper
+
 echo ===========================================
-echo Deteniendo el proyecto TennoStore...
+echo   TENNOSTORE - DETENIENDO PROYECTO
 echo ===========================================
-docker compose --env-file docker/.env -f docker/docker-compose.yml stop
+
+:: Verificar si Docker esta corriendo
+docker info >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [ERROR] Docker no esta corriendo. Nada que detener.
+    pause
+    exit /b
+)
+
+echo [DOCKER] Deteniendo contenedores...
+docker compose -f docker/docker-compose.yml down
+
 echo ===========================================
-echo ¡Proyecto detenido correctamente!
+echo   PROYECTO DETENIDO CORRECTAMENTE
 echo ===========================================
 pause

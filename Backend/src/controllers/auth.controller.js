@@ -28,13 +28,29 @@ const login = async (req, res) => {
     if (error) return res.status(400).json({ error: error.details[0].message });
 
     const { token, user } = await authService.loginUser(req.body.username, req.body.password);
-    res.json({ message: 'Login exitoso', token, user });
+    // Sanitizamos el objeto user antes de enviarlo
+    const sanitizedUser = { id: user.id, username: user.username, is_admin: user.is_admin };
+    res.json({ message: 'Login exitoso', token, user: sanitizedUser });
   } catch (err) {
     res.status(401).json({ error: err.message });
   }
 };
 
+const getMe = async (req, res) => {
+  try {
+    // req.user viene del middleware verifyToken
+    const user = await authService.getUserById(req.user.id);
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    
+    res.json({ user: { id: user.id, username: user.username, is_admin: user.is_admin } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener perfil' });
+  }
+};
+
 module.exports = {
   register,
-  login
+  login,
+  getMe
 };

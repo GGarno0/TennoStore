@@ -1,79 +1,58 @@
-# Documentación Operativa - TennoStore 
+# Documentación Operativa - TennoStore
+## Estado del Proyecto: Hito 2 (Fase de Seguridad e Integración)
 
-Este documento detalla el funcionamiento técnico, la seguridad y los procedimientos de mantenimiento de la plataforma **TennoStore**.
-
----
-
-## 1. Arquitectura y Despliegue
-La plataforma utiliza una arquitectura de microservicios dockerizados para garantizar un entorno estable:
-*   **Frontend:** React + Vite (Puerto 80).
-*   **Backend:** Node.js + Express (Puerto 3000).
-*   **Database:** PostgreSQL 15 (Puerto interno 5432 / Externo 5433).
-
-### Procedimiento de Inicio Rápido
-Para desplegar el sistema completo puedes usar el script de automatización en la raíz:
-```bash
-# Método recomendado (Windows)
-start.bat
-
-# Método manual (Docker)
-docker compose --env-file docker/.env -f docker/docker-compose.yml up -d --build
-```
+Esta documentación refleja las funcionalidades **actualmente implementadas y verificables** en el repositorio.
 
 ---
 
-## 2. Gestión de Usuarios y Seguridad (RBAC)
-El sistema implementa un control de acceso basado en roles para proteger la integridad de los datos.
-*   **Usuarios Estándar:** Pueden navegar, buscar, filtrar por género, gestionar su carrito y realizar compras simuladas.
-*   **Administradores:** Tienen acceso al Panel de Gestión para realizar operaciones CRUD (Crear, Leer, Actualizar, Borrar) sobre el catálogo de juegos.
+### 1. Seguridad y Autenticación (Implementada)
+Se ha implementado un sistema de seguridad basado en estándares industriales para proteger la integridad de los datos.
 
-### Seguridad en la API
-Las rutas sensibles están protegidas por middlewares de autenticación:
-1.  **verifyToken:** Valida el JSON Web Token (JWT) enviado en la cabecera de la petición.
-2.  **verifyAdmin:** Comprueba que el usuario tiene privilegios de administrador antes de permitir cambios en el inventario.
+*   **Encriptación de Contraseñas:** Ninguna contraseña se almacena en texto plano. Se utiliza `bcrypt` con 10 rondas de salting tanto en el registro de usuarios como en la semilla de la base de datos.
+*   **Autenticación JWT:** El acceso a funciones privadas (carrito, historial de pedidos) requiere un token JSON Web Token válido.
+*   **Autorización por Rol (RBAC):** Los endpoints de administración (`POST`, `PUT`, `DELETE` en `/api/games`) están protegidos por un middleware que verifica el flag `is_admin` del usuario en el token.
+*   **Gestión de Secretos:** Todas las credenciales sensibles (DB_USER, DB_PASS, JWT_SECRET) han sido extraídas a archivos `.env` y eliminadas de los archivos de configuración y del `docker-compose.yml`.
 
----
-
-## 3. Endpoints Principales de la API
-
-### Pedidos y Pagos
-*   **`POST /api/orders`**: Registra la compra tras la validación en la pasarela de pago. Genera un registro permanente asociado al usuario.
-
-### Gestión de Catálogo (Solo Administradores)
-*   **`POST /api/games`**: Añadir un nuevo título al sistema.
-*   **`PUT /api/games/:id`**: Actualizar información (precio, stock, etc.).
-*   **`DELETE /api/games/:id`**: Eliminar un juego del catálogo.
-
-### Historial y Estado
-*   **`GET /api/games/:id/history`**: Recupera los datos para la gráfica de evolución de precios.
-*   **`GET /api/status`**: Comprueba la disponibilidad del servidor backend.
+**Prueba de Auditoría:**
+1. Intente realizar un `POST` a `http://localhost:3000/api/games` sin token: Recibirá un `401 Unauthorized`.
+2. Intente realizar el mismo `POST` con un token de usuario normal: Recibirá un `403 Forbidden`.
 
 ---
 
-## 4. Lógica de Negocio y Automatización
-*   **Reserva de Stock:** Al añadir productos al carrito, el sistema reserva las unidades en la base de datos para evitar "overselling".
-*   **Expiración de Carrito:** Si el usuario no completa la compra en 10 minutos, el sistema libera automáticamente el stock reservado.
-*   **Sincronización:** El stock se actualiza en tiempo real en la interfaz cuando el usuario añade o quita elementos.
+### 2. Funcionalidades de Usuario (Implementadas)
+*   **Login y Registro:** Funcional con validación de esquemas (Joi).
+*   **Catálogo Dinámico:** Búsqueda en tiempo real, filtrado por categorías y visualización de stock.
+*   **Carrito de Compra:** Gestión de cantidades con persistencia en el estado de la sesión y sincronización con el stock del backend.
+*   **Reserva de Stock:** Al añadir un producto al carrito, se realiza una reserva temporal en la base de datos (Transacción ACID) para evitar overselling.
+*   **Historial de Precios:** Gráficas dinámicas generadas a partir de la tabla `price_history`.
 
 ---
 
-## 5. Mantenimiento y Backups
-
-### Crear Copia de Seguridad
-Genera un archivo `.sql` con el estado actual de toda la base de datos:
-```bash
-docker exec -t tenno_db pg_dump -U admin -d tennostore_db -c > backup_tennostore.sql
-```
-
-### Restaurar Datos
-```bash
-docker exec -i tenno_db psql -U admin -d tennostore_db < backup_tennostore.sql
-```
+### 3. Panel de Administración (Implementado)
+Acceso exclusivo para usuarios con `is_admin: true`.
+*   **CRUD de Catálogo:** Creación, edición y eliminación de videojuegos.
+*   **Gestión de Imágenes:** Integración con Cloudinary mediante almacenamiento de URLs dinámicas.
+*   **Control de Inventario:** Alerta visual de stock bajo y actualización en tiempo real.
 
 ---
 
-## 6. Configuración (Variables de Entorno)
-Ubicadas en `docker/.env`. Es fundamental configurar estas variables para el correcto inicio del sistema:
-*   `DB_USER / DB_PASS`: Credenciales de acceso a PostgreSQL.
-*   `JWT_SECRET`: Clave maestra para la generación de tokens de sesión.
-*   `VITE_API_URL`: Dirección del servidor backend para las llamadas desde el cliente.
+### 4. Guía de Inicio Rápido para Evaluadores
+Para verificar el proyecto en un entorno limpio:
+
+1.  **Variables de Entorno:** Cree un archivo `.env` en la carpeta `docker/` basándose en el ejemplo proporcionado.
+2.  **Despliegue:** Ejecute `docker-compose up --build`.
+3.  **Acceso Admin:** 
+    *   **Usuario:** `admin`
+    *   **Password:** `admin123` (Pre-cargado en `init.sql` con hash bcrypt).
+4.  **Acceso Usuario:**
+    *   **Usuario:** `user`
+    *   **Password:** `user123`
+
+---
+
+### 5. Estructura Técnica
+El proyecto sigue una arquitectura de capas para asegurar la escalabilidad:
+*   **Routes:** Definición de endpoints y aplicación de middlewares de seguridad.
+*   **Controllers:** Validación de entrada y gestión de respuestas HTTP.
+*   **Services:** Lógica de negocio y consultas a la base de datos mediante `pg` (Pool de conexiones).
+*   **Middlewares:** Verificación de identidad y roles.
