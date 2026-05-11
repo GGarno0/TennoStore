@@ -5,7 +5,7 @@
 
 ---
 
-## 🛠️ Arquitectura del Sistema
+## Arquitectura del Sistema
 El proyecto ha sido estructurado siguiendo el patrón de **Arquitectura en Capas**, lo que permite una clara separación de responsabilidades:
 
 *   **Frontend (React + Vite):** Interfaz SPA moderna, reactiva y segura.
@@ -18,18 +18,18 @@ El proyecto ha sido estructurado siguiendo el patrón de **Arquitectura en Capas
 
 ---
 
-## 🔐 Seguridad y Protección de Datos
+## Seguridad y Protección de Datos
 Se han implementado las siguientes medidas para cumplir con los estándares de seguridad:
 
 1.  **Autenticación JWT:** Sesiones seguras mediante tokens firmados.
-2.  **Encriptación Bcrypt:** Las contraseñas se almacenan únicamente como hashes salteados (10 rondas).
+2.  **Encriptación Bcrypt:** Las contraseñas se almacenan únicamente como hashes salteados.
 3.  **RBAC (Role-Based Access Control):** Diferenciación estricta entre usuarios y administradores.
 4.  **Sanitización de Salida:** Los datos sensibles (hashes de contraseñas) se eliminan de las respuestas de la API.
 5.  **Gestión de Secretos:** Eliminación total de credenciales hardcodeadas; uso exclusivo de variables de entorno `.env`.
 
 ---
 
-## 🚀 Cómo Arrancar el Proyecto
+## Cómo Arrancar el Proyecto
 
 1.  **Configuración:** 
     Copie el archivo `docker/.env.example` a `docker/.env` y ajuste el `JWT_SECRET`.
@@ -46,5 +46,5 @@ Se han implementado las siguientes medidas para cumplir con los estándares de s
 
 ---
 
-## 📄 Documentación Operativa
+## Documentación Operativa
 Para ver una guía detallada de las operaciones y pruebas de auditoría de seguridad, consulte el archivo [OPERACIONES.md](./OPERACIONES.md).
