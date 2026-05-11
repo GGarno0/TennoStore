@@ -1,7 +1,7 @@
 # Documentación Operativa - TennoStore
-## Estado del Proyecto: Hito 2 (Fase de Seguridad e Integración)
+## Estado del Proyecto:
 
-Esta documentación refleja las funcionalidades **actualmente implementadas y verificables** en el repositorio.
+Esta documentación refleja las funcionalidades actualmente implementadas y verificables en el repositorio.
 
 ---
 
