@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 const AuthModal = ({ onClose, onLogin, API_URL }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,12 +22,13 @@ const AuthModal = ({ onClose, onLogin, API_URL }) => {
 
     setLoading(true);
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+    const body = isLogin ? { username, password } : { username, email, password };
 
     try {
       const res = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify(body)
       });
 
       const data = await res.json();
@@ -49,7 +52,9 @@ const AuthModal = ({ onClose, onLogin, API_URL }) => {
     }
   };
 
-  return (
+  if (!onClose) return null; // Defensive check
+
+  return createPortal(
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
       <div className="bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-700 animate-scale-up">
         <h2 className="text-3xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
@@ -64,7 +69,9 @@ const AuthModal = ({ onClose, onLogin, API_URL }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-gray-400 mb-1 text-xs uppercase font-bold tracking-widest">Usuario</label>
+            <label className="block text-gray-400 mb-1 text-xs uppercase font-bold tracking-widest">
+              {isLogin ? 'Usuario o Email' : 'Usuario'}
+            </label>
             <input 
               type="text" 
               required
@@ -74,6 +81,19 @@ const AuthModal = ({ onClose, onLogin, API_URL }) => {
               className="w-full bg-gray-900 border border-gray-600 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500 transition-all"
             />
           </div>
+
+          {!isLogin && (
+            <div className="animate-fade-in">
+              <label className="block text-gray-400 mb-1 text-xs uppercase font-bold tracking-widest">Email</label>
+              <input 
+                type="email" 
+                required
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="w-full bg-gray-900 border border-gray-600 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500 transition-all"
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-gray-400 mb-1 text-xs uppercase font-bold tracking-widest">Contraseña</label>
@@ -160,7 +180,8 @@ const AuthModal = ({ onClose, onLogin, API_URL }) => {
           </button>
         </p>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

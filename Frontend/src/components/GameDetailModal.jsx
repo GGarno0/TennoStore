@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import PriceHistoryChart from './PriceHistoryChart';
 
 const GameDetailModal = ({ game, isOpen, onClose, onAddToCart, onSelectGame, API_URL, token }) => {
@@ -23,7 +24,7 @@ const GameDetailModal = ({ game, isOpen, onClose, onAddToCart, onSelectGame, API
 
   if (!isOpen || !game) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[70] backdrop-blur-xl p-4 overflow-y-auto">
       <div className="bg-gray-900 w-full max-w-4xl rounded-3xl border border-gray-700 shadow-2xl animate-scale-up my-8">
         
@@ -56,9 +57,21 @@ const GameDetailModal = ({ game, isOpen, onClose, onAddToCart, onSelectGame, API
           </button>
           
           <div className="absolute bottom-8 left-8 z-10">
-            <span className="bg-cyan-500/20 text-cyan-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-3 inline-block border border-cyan-500/30 backdrop-blur-sm">
-              {game.categoria}
-            </span>
+            <div className="flex gap-2 mb-3">
+              <span className="bg-cyan-500/20 text-cyan-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest inline-block border border-cyan-500/30 backdrop-blur-sm">
+                {game.categoria}
+              </span>
+              {(game.plataforma || 'MULTI').split(',').map(plat => (
+                <span key={plat} className="bg-purple-500/20 text-purple-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest inline-block border border-purple-500/30 backdrop-blur-sm">
+                  {plat.trim()}
+                </span>
+              ))}
+              {game.precio_anterior && (
+                <span className="bg-red-500/20 text-red-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest inline-block border border-red-500/30 backdrop-blur-sm animate-pulse">
+                  -{Math.round(((game.precio_anterior - game.precio) / game.precio_anterior) * 100)}% Oferta
+                </span>
+              )}
+            </div>
             <h2 className="text-4xl md:text-6xl font-black text-white drop-shadow-2xl">{game.titulo}</h2>
           </div>
         </div>
@@ -71,7 +84,12 @@ const GameDetailModal = ({ game, isOpen, onClose, onAddToCart, onSelectGame, API
             <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
               <div className="flex justify-between items-end mb-4">
                 <span className="text-gray-400 text-sm">Precio Actual</span>
-                <span className="text-4xl font-black text-cyan-400">{game.precio}€</span>
+                <div className="text-right">
+                  {game.precio_anterior && (
+                    <div className="text-sm text-gray-500 line-through mb-1">{game.precio_anterior}€</div>
+                  )}
+                  <span className="text-4xl font-black text-cyan-400">{game.precio}€</span>
+                </div>
               </div>
               <div className="flex justify-between items-center text-sm mb-6">
                 <span className="text-gray-400">Estado</span>
@@ -140,7 +158,8 @@ const GameDetailModal = ({ game, isOpen, onClose, onAddToCart, onSelectGame, API
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

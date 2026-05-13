@@ -36,7 +36,7 @@ const GameCard = ({ game, token, API_URL, onShowAuth, onAddToCart, onShowDetail 
         throw new Error(data.error || 'Error al reservar');
       }
 
-      setMessage('¡Añadido y Reservado!');
+      setMessage('¡Añadido al carrito!');
       setLocalStock(prev => prev - 1);
       
       // Añadir al estado del carrito en React
@@ -71,24 +71,54 @@ const GameCard = ({ game, token, API_URL, onShowAuth, onAddToCart, onShowDetail 
          <span className="text-white font-black text-2xl z-10 drop-shadow-lg opacity-20 group-hover:opacity-100 transition-opacity">
             {game.titulo.substring(0, 2).toUpperCase()}
          </span>
+         
+         {/* Badge de Oferta */}
+         {game.precio_anterior && (
+           <div className="absolute top-4 left-4 z-20 flex flex-col gap-1">
+             <div className="bg-red-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg shadow-red-600/40 animate-pulse flex items-center gap-1.5 border border-red-400/50">
+               <span className="relative flex h-2 w-2">
+                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                 <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+               </span>
+               OFERTA
+             </div>
+             <div className="bg-white/10 backdrop-blur-md text-white text-[11px] font-black px-3 py-1 rounded-full border border-white/20 text-center">
+               -{Math.round((1 - (parseFloat(game.precio) / parseFloat(game.precio_anterior))) * 100)}%
+             </div>
+           </div>
+         )}
       </div>
       
       {/* Información del juego */}
       <div className="p-5 flex-1 flex flex-col">
         <div className="flex justify-between items-start mb-2">
           <h3 
-            className="text-xl font-bold text-gray-100 leading-tight cursor-pointer hover:text-cyan-400 transition-colors"
+            className="text-xl font-bold text-gray-100 leading-tight cursor-pointer hover:text-cyan-400 transition-colors line-clamp-2 h-14"
+            title={game.titulo}
             onClick={() => onShowDetail(game)}
           >
             {game.titulo}
           </h3>
-          <span className="bg-cyan-900/50 text-cyan-300 text-xs font-bold px-2 py-1 rounded whitespace-nowrap ml-2">
-            {game.categoria || 'Juego'}
-          </span>
+          <div className="flex flex-col items-end gap-1 ml-2">
+            <span className="bg-cyan-900/50 text-cyan-300 text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap uppercase tracking-widest border border-cyan-800/30">
+              {game.categoria || 'Juego'}
+            </span>
+          </div>
         </div>
         
         <div className="flex justify-between items-center">
-          <span className="text-2xl font-bold text-white">{game.precio}€</span>
+          <div className="flex flex-col">
+            {game.precio_anterior && (
+              <span className="text-xs text-gray-500 line-through font-semibold mb-0.5">
+                {game.precio_anterior}€
+              </span>
+            )}
+            <div className="flex items-center gap-2">
+              <span className={`text-2xl font-black ${game.precio_anterior ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.3)]' : 'text-white'}`}>
+                {game.precio}€
+              </span>
+            </div>
+          </div>
           <span className={`text-sm font-bold ${localStock > 10 ? 'text-green-400' : localStock > 0 ? 'text-orange-400' : 'text-red-500'}`}>
             {localStock > 0 ? `${localStock} unidades` : 'Sin Stock'}
           </span>

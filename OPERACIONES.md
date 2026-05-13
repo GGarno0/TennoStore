@@ -1,58 +1,59 @@
 # Documentación Operativa - TennoStore
-## Estado del Proyecto:
 
-Esta documentación refleja las funcionalidades actualmente implementadas y verificables en el repositorio.
-
----
-
-### 1. Seguridad y Autenticación (Implementada)
-Se ha implementado un sistema de seguridad basado en estándares industriales para proteger la integridad de los datos.
-
-*   **Encriptación de Contraseñas:** Ninguna contraseña se almacena en texto plano. Se utiliza `bcrypt` con 10 rondas de salting tanto en el registro de usuarios como en la semilla de la base de datos.
-*   **Autenticación JWT:** El acceso a funciones privadas (carrito, historial de pedidos) requiere un token JSON Web Token válido.
-*   **Autorización por Rol (RBAC):** Los endpoints de administración (`POST`, `PUT`, `DELETE` en `/api/games`) están protegidos por un middleware que verifica el flag `is_admin` del usuario en el token.
-*   **Gestión de Secretos:** Todas las credenciales sensibles (DB_USER, DB_PASS, JWT_SECRET) han sido extraídas a archivos `.env` y eliminadas de los archivos de configuración y del `docker-compose.yml`.
-
-**Prueba de Auditoría:**
-1. Intente realizar un `POST` a `http://localhost:3000/api/games` sin token: Recibirá un `401 Unauthorized`.
-2. Intente realizar el mismo `POST` con un token de usuario normal: Recibirá un `403 Forbidden`.
+Este manual detalla los procedimientos necesarios para la administración, mantenimiento y auditoría de la plataforma.
 
 ---
 
-### 2. Funcionalidades de Usuario (Implementadas)
-*   **Login y Registro:** Funcional con validación de esquemas (Joi).
-*   **Catálogo Dinámico:** Búsqueda en tiempo real, filtrado por categorías y visualización de stock.
-*   **Carrito de Compra:** Gestión de cantidades con persistencia en el estado de la sesión y sincronización con el stock del backend.
-*   **Reserva de Stock:** Al añadir un producto al carrito, se realiza una reserva temporal en la base de datos (Transacción ACID) para evitar overselling.
-*   **Historial de Precios:** Gráficas dinámicas generadas a partir de la tabla `price_history`.
+## 1. Gestión de Seguridad y Acceso
+
+### Auditoría de Endpoints
+El sistema implementa una defensa en profundidad. Puede verificar la seguridad mediante las siguientes pruebas:
+*   **Acceso no autorizado:** Cualquier petición a `/api/admin` o `/api/orders` sin una cabecera de `Authorization: Bearer <token>` resultará en un error `401`.
+*   **Escalada de privilegios:** Un token de usuario estándar intentando acceder a funciones de edición de catálogo recibirá un error `403`.
+
+### Protección de Datos Sensibles
+*   **Hashes:** El sistema nunca almacena ni transmite contraseñas en texto plano.
+*   **Variables de entorno:** Todas las configuraciones críticas se inyectan en tiempo de ejecución a través del archivo `.env` en la carpeta `docker/`.
 
 ---
 
-### 3. Panel de Administración (Implementado)
-Acceso exclusivo para usuarios con `is_admin: true`.
-*   **CRUD de Catálogo:** Creación, edición y eliminación de videojuegos.
-*   **Gestión de Imágenes:** Integración con Cloudinary mediante almacenamiento de URLs dinámicas.
-*   **Control de Inventario:** Alerta visual de stock bajo y actualización en tiempo real.
+## 2. Integridad de Datos y Control de Stock
+
+El sistema garantiza que no se pierdan unidades de inventario mediante dos mecanismos sincronizados:
+1.  **Reserva Temporal:** Al añadir al carrito, el servidor resta 1 unidad del stock físico de forma transaccional.
+2.  **Devolución Automática:** El frontend gestiona un temporizador de 10 minutos. Si la compra no se completa o el item se elimina, se envía una señal de liberación de stock (`cancel-reservation`).
+3.  **Persistencia:** El carrito se guarda en `localStorage` vinculado al ID del usuario (`cart_${userId}`), evitando la pérdida de stock reservado al refrescar la página.
 
 ---
 
-### 4. Guía de Inicio Rápido para Evaluadores
-Para verificar el proyecto en un entorno limpio:
+## 3. Procedimientos de Mantenimiento
 
-1.  **Variables de Entorno:** Cree un archivo `.env` en la carpeta `docker/` basándose en el ejemplo proporcionado.
-2.  **Despliegue:** Ejecute `docker-compose up --build`.
-3.  **Acceso Admin:** 
-    *   **Usuario:** `admin`
-    *   **Password:** `admin123` (Pre-cargado en `init.sql` con hash bcrypt).
-4.  **Acceso Usuario:**
-    *   **Usuario:** `user`
-    *   **Password:** `user123`
+### Copias de Seguridad (Backup)
+Para realizar un respaldo completo de la base de datos (esquema y datos):
+*   **Windows:** Ejecute `scripts\backup_db.bat`.
+*   **Linux/WSL:** Ejecute `./scripts/backup_db.sh`.
+Los archivos se generarán en la carpeta `backups/` con un sello de tiempo.
+
+### Restauración de Sistema (Restore)
+En caso de fallo crítico o necesidad de migración:
+*   **Windows:** Ejecute `scripts\restore_db.bat backups\nombre_archivo.sql`.
+*   **Linux/WSL:** Ejecute `./scripts/restore_db.sh backups/nombre_archivo.sql`.
+Este proceso recreará la base de datos desde cero utilizando el punto de restauración seleccionado.
 
 ---
 
-### 5. Estructura Técnica
-El proyecto sigue una arquitectura de capas para asegurar la escalabilidad:
-*   **Routes:** Definición de endpoints y aplicación de middlewares de seguridad.
-*   **Controllers:** Validación de entrada y gestión de respuestas HTTP.
-*   **Services:** Lógica de negocio y consultas a la base de datos mediante `pg` (Pool de conexiones).
-*   **Middlewares:** Verificación de identidad y roles.
+## 4. Guía de Administración del Catálogo
+
+1.  **Acceso:** Inicie sesión con la cuenta de administrador.
+2.  **Inventario:** Desde el Panel Admin, utilice el buscador para localizar productos rápidamente.
+3.  **Historial:** Pulse el icono de gráfica en cualquier juego para analizar la evolución de su precio en los últimos 30 días.
+4.  **Informes:** Los informes de actividad de usuario pueden exportarse a PDF desde el perfil de cada cliente para auditorías de compras.
+
+---
+
+## 5. Resolución de Incidencias Comunes
+
+*   **Problema:** Los cambios en `init.sql` no se reflejan.
+    *   **Solución:** Ejecute `docker compose down -v` para eliminar los volúmenes de datos antiguos y reinicie con `start.bat`.
+*   **Problema:** Error de conexión a la base de datos en local.
+    *   **Solución:** Verifique que los puertos 5432 y 3000 no estén siendo usados por otros servicios locales fuera de Docker.

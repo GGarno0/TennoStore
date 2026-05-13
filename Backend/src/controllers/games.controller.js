@@ -66,16 +66,24 @@ const cancelReservation = async (req, res) => {
   }
 };
 
-// Admin CRUD Controllers
+// Registro de nuevo juego con validación básica
 const createGame = async (req, res) => {
-  const { titulo, precio, stock, categoria, imagen_url } = req.body;
+  const { titulo, precio, stock, categoria, plataforma, imagen_url } = req.body;
+  
   if (!titulo || precio === undefined || stock === undefined) {
     return res.status(400).json({ error: 'Faltan datos obligatorios' });
   }
+  // Evitamos datos inconsistentes en la DB
+  if (parseFloat(precio) < 0 || parseInt(stock) < 0) {
+    return res.status(400).json({ error: 'El precio y el stock no pueden ser negativos' });
+  }
   try {
-    const game = await gamesService.createGame(titulo, precio, stock, categoria, imagen_url);
+    const game = await gamesService.createGame(titulo, precio, stock, categoria, plataforma, imagen_url);
     res.status(201).json(game);
   } catch (err) {
+    if (err.code === '23505') {
+      return res.status(400).json({ error: 'Ya existe un videojuego con ese título exactamente' });
+    }
     console.error(err);
     res.status(500).json({ error: 'Error al crear juego' });
   }
@@ -83,11 +91,22 @@ const createGame = async (req, res) => {
 
 const updateGame = async (req, res) => {
   const { id } = req.params;
-  const { titulo, precio, stock, categoria, imagen_url } = req.body;
+  const { titulo, precio, stock, categoria, plataforma, imagen_url } = req.body;
+  if (precio !== undefined && parseFloat(precio) < 0) {
+    return res.status(400).json({ error: 'El precio no puede ser negativo' });
+  }
+  if (stock !== undefined && parseInt(stock) < 0) {
+    return res.status(400).json({ error: 'El stock no puede ser negativo' });
+  }
+  
+  // Actualización de producto existente
   try {
-    const game = await gamesService.updateGame(id, titulo, precio, stock, categoria, imagen_url);
+    const game = await gamesService.updateGame(id, titulo, precio, stock, categoria, plataforma, imagen_url);
     res.json(game);
   } catch (err) {
+    if (err.code === '23505') {
+      return res.status(400).json({ error: 'Ya existe otro videojuego con ese título' });
+    }
     console.error(err);
     res.status(500).json({ error: 'Error al actualizar juego' });
   }

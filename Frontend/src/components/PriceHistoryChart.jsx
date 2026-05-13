@@ -46,6 +46,19 @@ const PriceHistoryChart = ({ gameId, API_URL }) => {
     return null;
   }
 
+  // Verificar si ha habido cambios (C10)
+  const prices = history.map(h => parseFloat(h.precio));
+  const allSame = prices.every(p => p === prices[0]);
+
+  if (allSame || history.length <= 1) {
+    return (
+      <div className="h-24 w-full mt-2 bg-gray-900/30 rounded flex flex-col items-center justify-center border border-gray-700/50 p-2">
+        <p className="text-[10px] text-gray-400 mb-1 font-semibold tracking-wider">EVOLUCIÓN 30 DÍAS</p>
+        <p className="text-xs text-gray-500 italic text-center">No se han registrado variaciones de precio recientemente</p>
+      </div>
+    );
+  }
+
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -77,7 +90,8 @@ const PriceHistoryChart = ({ gameId, API_URL }) => {
 
   const labels = history.map(h => {
     const d = new Date(h.fecha);
-    return `${d.getDate()}/${d.getMonth() + 1}`;
+    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return `${d.getDate()} ${meses[d.getMonth()]}`;
   });
 
   const data = {

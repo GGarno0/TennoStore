@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 const PaymentModal = ({ isOpen, onClose, total, onPaymentSuccess }) => {
   const [formData, setFormData] = useState({
@@ -52,7 +53,7 @@ const PaymentModal = ({ isOpen, onClose, total, onPaymentSuccess }) => {
     }, 2000);
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[60] backdrop-blur-md">
       <div className="bg-gray-900 w-full max-w-md p-8 rounded-3xl border border-gray-700 shadow-2xl animate-scale-up">
         
@@ -160,7 +161,8 @@ const PaymentModal = ({ isOpen, onClose, total, onPaymentSuccess }) => {
           Pago seguro encriptado • TennoStore Simulation Gateway
         </p>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

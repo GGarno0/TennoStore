@@ -1,50 +1,57 @@
 # TennoStore - E-Commerce de Videojuegos
 ## Proyecto Full Stack con Seguridad y Arquitectura de Capas
 
-**TennoStore** es una plataforma profesional para la venta de videojuegos, diseñada con un enfoque en la seguridad, la gestión de inventario en tiempo real y la visualización de datos históricos.
+TennoStore es una plataforma profesional para la venta de videojuegos, diseñada con un enfoque en la seguridad, la gestión de inventario en tiempo real y la recuperación ante fallos.
+
+---
+
+## Funcionalidades Principales
+
+### Gestión de Usuarios y Seguridad
+*   **Autenticación Robusta:** Implementación de JWT (JSON Web Tokens) para la gestión de sesiones.
+*   **Seguridad de Datos:** Encriptación de contraseñas con Bcrypt y protección contra inyecciones SQL mediante consultas parametrizadas.
+*   **Perfiles de Usuario:** Gestión de datos personales, eliminación de cuenta (cumplimiento RGPD) y exportación de actividad en PDF.
+
+### Catálogo e Inventario
+*   **Búsqueda Inteligente:** Algoritmo de relevancia que prioriza coincidencias exactas y orden alfabético.
+*   **Control de Stock:** Sistema de reserva temporal de stock (10 minutos) mediante transacciones ACID para evitar sobreventa.
+*   **Historial de Precios:** Registro automático de variaciones de precio y visualización gráfica de tendencias.
+
+### Proceso de Compra
+*   **Carrito Persistente:** Almacenamiento local aislado por ID de usuario para evitar conflictos entre sesiones.
+*   **Detalle de Pedidos:** Registro exhaustivo de compras incluyendo títulos, cantidades y precios históricos en el momento del pago.
+
+### Administración
+*   **Panel de Control:** Gestión integral de catálogo (CRUD) y usuarios.
+*   **Mantenimiento:** Scripts automatizados de copia de seguridad (Backup) y restauración (Restore) para entornos Windows y Linux.
 
 ---
 
 ## Arquitectura del Sistema
-El proyecto ha sido estructurado siguiendo el patrón de **Arquitectura en Capas**, lo que permite una clara separación de responsabilidades:
-
-*   **Frontend (React + Vite):** Interfaz SPA moderna, reactiva y segura.
-*   **Backend (Node.js + Express):** API REST robusta organizada en:
-    *   **Rutas:** Definición de puntos de entrada y aplicación de seguridad.
-    *   **Controladores:** Gestión de peticiones/respuestas y validación de datos (Joi).
-    *   **Servicios:** Lógica de negocio pura e interacción con la base de datos (PostgreSQL).
-    *   **Middlewares:** Filtros de seguridad (JWT) y autorización por roles.
-*   **Infraestructura (Docker):** Orquestación mediante Docker Compose para asegurar un entorno de desarrollo idéntico al de producción.
+El proyecto utiliza una arquitectura de capas bien definida:
+*   **Frontend (React + Vite):** SPA modular con Tailwind CSS para una interfaz reactiva.
+*   **Backend (Node.js + Express):** API REST organizada en Rutas, Controladores, Servicios y Middlewares.
+*   **Base de Datos (PostgreSQL):** Esquema relacional con integridad referencial y disparadores automáticos.
+*   **Contenedores (Docker):** Orquestación completa mediante Docker Compose para facilitar el despliegue.
 
 ---
 
-## Seguridad y Protección de Datos
-Se han implementado las siguientes medidas para cumplir con los estándares de seguridad:
+## Instrucciones de Inicio Rápido
 
-1.  **Autenticación JWT:** Sesiones seguras mediante tokens firmados.
-2.  **Encriptación Bcrypt:** Las contraseñas se almacenan únicamente como hashes salteados.
-3.  **RBAC (Role-Based Access Control):** Diferenciación estricta entre usuarios y administradores.
-4.  **Sanitización de Salida:** Los datos sensibles (hashes de contraseñas) se eliminan de las respuestas de la API.
-5.  **Gestión de Secretos:** Eliminación total de credenciales hardcodeadas; uso exclusivo de variables de entorno `.env`.
+1.  **Configuración de Entorno:**
+    Copie el archivo `docker/.env.example` a `docker/.env` y configure las credenciales deseadas.
 
----
-
-## Cómo Arrancar el Proyecto
-
-1.  **Configuración:** 
-    Copie el archivo `docker/.env.example` a `docker/.env` y ajuste el `JWT_SECRET`.
-2.  **Despliegue:** 
-    Desde la raíz del proyecto, ejecute:
+2.  **Despliegue:**
+    Ejecute el script `start.bat` o utilice el comando:
     ```bash
     docker compose --env-file docker/.env -f docker/docker-compose.yml up -d --build
     ```
-    *(O utilice los scripts facilitados `start.bat` / `stop.bat`)*.
 
-3.  **Credenciales de Prueba:**
-    *   **Administrador:** `admin` / `admin123`
-    *   **Usuario:** `user` / `user123`
+3.  **Credenciales por Defecto:**
+    *   **Admin:** admin / admin123
+    *   **Usuario:** user / user123
 
 ---
 
-## Documentación Operativa
-Para ver una guía detallada de las operaciones y pruebas de auditoría de seguridad, consulte el archivo [OPERACIONES.md](./OPERACIONES.md).
+## Mantenimiento y Auditoría
+Para detalles sobre la ejecución de pruebas y procedimientos de respaldo, consulte la [Bitácora Técnica](./docs/BITACORA_TECNICA.md) y el [Manual de Operaciones](./OPERACIONES.md).

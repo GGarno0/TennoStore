@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 const CartModal = ({ isOpen, onClose, cart, onRemoveFromCart, onUpdateQuantity, onCheckout }) => {
   const [now, setNow] = useState(Date.now());
@@ -31,7 +32,7 @@ const CartModal = ({ isOpen, onClose, cart, onRemoveFromCart, onUpdateQuantity, 
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-black/80 flex justify-end z-50 backdrop-blur-sm transition-opacity">
       <div className="bg-gray-900 w-full max-w-md h-full shadow-2xl flex flex-col border-l border-gray-700 animate-slide-in-right">
         
@@ -129,7 +130,8 @@ const CartModal = ({ isOpen, onClose, cart, onRemoveFromCart, onUpdateQuantity, 
         </div>
         
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
