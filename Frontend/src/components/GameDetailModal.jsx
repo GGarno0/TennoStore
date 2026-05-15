@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import PriceHistoryChart from './PriceHistoryChart';
 
-const GameDetailModal = ({ game, isOpen, onClose, onAddToCart, onSelectGame, API_URL, token }) => {
+const GameDetailModal = ({ game, isOpen, onClose, onAddToCart, onSelectGame, onShowAuth, API_URL, token }) => {
   const [recommendations, setRecommendations] = useState([]);
   const [loadingRecs, setLoadingRecs] = useState(false);
+  const [reserving, setReserving] = useState(false);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     if (isOpen && game) {
@@ -22,14 +24,57 @@ const GameDetailModal = ({ game, isOpen, onClose, onAddToCart, onSelectGame, API
     }
   }, [isOpen, game, API_URL]);
 
+  const handleReserve = async () => {
+    if (!token) {
+      onClose(); // Cerrar el modal para que se vea el modal de auth
+      onShowAuth();
+      return;
+    }
+
+    setReserving(true);
+    setMessage('');
+
+    try {
+      const res = await fetch(`${API_URL}/api/games/reserve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ gameId: game.id })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Error al reservar');
+      }
+
+      setMessage('¡Añadido al carrito!');
+      onAddToCart(game);
+      
+      // Cerrar el modal poco después para que se vea el mensaje (o instantáneo)
+      setTimeout(() => {
+        onClose();
+        setMessage('');
+      }, 800);
+      
+    } catch (err) {
+      setMessage(err.message);
+      setTimeout(() => setMessage(''), 3000);
+    } finally {
+      setReserving(false);
+    }
+  };
+
   if (!isOpen || !game) return null;
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[70] backdrop-blur-xl p-4 overflow-y-auto">
-      <div className="bg-gray-900 w-full max-w-4xl rounded-3xl border border-gray-700 shadow-2xl animate-scale-up my-8">
+    <div className="fixed inset-0 bg-black/90 flex items-start md:items-center justify-center z-[70] backdrop-blur-xl p-0 md:p-4 overflow-y-auto">
+      <div className="bg-gray-900 w-full max-w-4xl rounded-none md:rounded-3xl border-x md:border border-gray-700 shadow-2xl animate-scale-up md:my-8 relative">
         
         {/* Cabecera con Diseño de Respaldo (CSS) */}
-        <div className="relative h-64 md:h-80 overflow-hidden rounded-t-3xl bg-gradient-to-br from-purple-800 via-gray-900 to-cyan-900 flex items-center justify-center">
+        <div className="relative h-48 sm:h-64 md:h-80 overflow-hidden rounded-t-none md:rounded-t-3xl bg-gradient-to-br from-purple-800 via-gray-900 to-cyan-900 flex items-center justify-center">
           
           {/* Tipografía de fondo (estilo moderno) */}
           <span className="absolute text-[12rem] font-black text-white/5 select-none tracking-tighter">
@@ -51,32 +96,41 @@ const GameDetailModal = ({ game, isOpen, onClose, onAddToCart, onSelectGame, API
           
           <button 
             onClick={onClose}
-            className="absolute top-6 right-6 bg-black/50 hover:bg-black/80 text-white p-2 rounded-full transition-all z-20 border border-white/10"
+            className="absolute top-4 right-4 md:top-6 md:right-6 bg-black/60 hover:bg-black/80 text-white p-2.5 rounded-full transition-all z-50 border border-white/20 shadow-lg backdrop-blur-md"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
           
-          <div className="absolute bottom-8 left-8 z-10">
-            <div className="flex gap-2 mb-3">
-              <span className="bg-cyan-500/20 text-cyan-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest inline-block border border-cyan-500/30 backdrop-blur-sm">
+          <div className="absolute top-4 -left-1.5 z-50 flex flex-col gap-1 items-start">
+             {/* Etiqueta de Oferta (Ribbon) */}
+             {game.precio_anterior && (
+               <>
+                 <div className="bg-red-600 text-white text-[11px] md:text-xs font-black px-4 py-2 rounded-r-xl shadow-[5px_5px_20px_rgba(220,38,38,0.5)] border-l-4 border-red-800 uppercase tracking-widest animate-pulse">
+                   OFERTA ESPECIAL
+                 </div>
+                 <div className="ml-2 bg-white text-gray-900 text-[14px] md:text-16px font-black px-3 py-1 rounded-lg shadow-2xl border border-white/20">
+                   AHORRAS {Math.round(((game.precio_anterior - game.precio) / game.precio_anterior) * 100)}%
+                 </div>
+               </>
+             )}
+          </div>
+          
+          <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 z-10 w-full pr-12">
+            <div className="flex flex-wrap gap-2 mb-2 md:mb-3">
+              <span className="bg-cyan-500/20 text-cyan-400 text-[10px] md:text-xs font-bold px-2 md:px-3 py-1 rounded-full uppercase tracking-widest inline-block border border-cyan-500/30 backdrop-blur-sm">
                 {game.categoria}
               </span>
               {(game.plataforma || 'MULTI').split(',').map(plat => (
-                <span key={plat} className="bg-purple-500/20 text-purple-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest inline-block border border-purple-500/30 backdrop-blur-sm">
+                <span key={plat} className="bg-purple-500/20 text-purple-400 text-[10px] md:text-xs font-bold px-2 md:px-3 py-1 rounded-full uppercase tracking-widest inline-block border border-purple-500/30 backdrop-blur-sm">
                   {plat.trim()}
                 </span>
               ))}
-              {game.precio_anterior && (
-                <span className="bg-red-500/20 text-red-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest inline-block border border-red-500/30 backdrop-blur-sm animate-pulse">
-                  -{Math.round(((game.precio_anterior - game.precio) / game.precio_anterior) * 100)}% Oferta
-                </span>
-              )}
             </div>
-            <h2 className="text-4xl md:text-6xl font-black text-white drop-shadow-2xl">{game.titulo}</h2>
+            <h2 className="text-2xl sm:text-4xl md:text-6xl font-black text-white drop-shadow-2xl leading-tight line-clamp-2">{game.titulo}</h2>
           </div>
         </div>
 
-        <div className="p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="p-4 sm:p-8 grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           
           {/* Columna Izquierda: Info y Compra */}
           <div className="lg:col-span-1 space-y-6">
@@ -97,14 +151,33 @@ const GameDetailModal = ({ game, isOpen, onClose, onAddToCart, onSelectGame, API
                   {game.stock > 0 ? `${game.stock} Unidades disponibles` : 'Agotado'}
                 </span>
               </div>
-              <button 
-                onClick={() => onAddToCart(game)}
-                disabled={game.stock <= 0}
-                className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg disabled:opacity-50 flex justify-center items-center gap-2"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                Añadir al Carrito
-              </button>
+              <div className="relative">
+                {message && (
+                  <div className="absolute -top-10 left-0 right-0 flex justify-center animate-bounce-in z-50 pointer-events-none">
+                    <div className={`px-4 py-1.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest shadow-2xl border backdrop-blur-md whitespace-nowrap ${
+                      message.includes('Añadido') 
+                        ? 'bg-green-500/90 text-white border-green-400 shadow-green-500/40' 
+                        : 'bg-red-500/90 text-white border-red-400 shadow-red-500/40'
+                    }`}>
+                      {message}
+                    </div>
+                  </div>
+                )}
+                <button 
+                  onClick={handleReserve}
+                  disabled={game.stock <= 0 || reserving}
+                  className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg disabled:opacity-50 flex justify-center items-center gap-2"
+                >
+                  {reserving ? (
+                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-white"></div>
+                  ) : (
+                    <>
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                      Añadir al Carrito
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="text-gray-400 text-sm leading-relaxed">

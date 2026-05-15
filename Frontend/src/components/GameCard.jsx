@@ -72,17 +72,15 @@ const GameCard = ({ game, token, API_URL, onShowAuth, onAddToCart, onShowDetail 
             {game.titulo.substring(0, 2).toUpperCase()}
          </span>
          
-         {/* Badge de Oferta */}
+         {/* Sistema de Ofertas Mejorado */}
          {game.precio_anterior && (
-           <div className="absolute top-4 left-4 z-20 flex flex-col gap-1">
-             <div className="bg-red-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg shadow-red-600/40 animate-pulse flex items-center gap-1.5 border border-red-400/50">
-               <span className="relative flex h-2 w-2">
-                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                 <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-               </span>
+           <div className="absolute top-4 -left-1.5 z-20 flex flex-col gap-1 items-start">
+             {/* Etiqueta que sobresale */}
+             <div className="bg-red-600 text-white text-[9px] font-black px-3 py-1.5 rounded-r-lg shadow-[4px_4px_15px_rgba(220,38,38,0.4)] border-l-4 border-red-800 uppercase tracking-tighter animate-pulse">
                OFERTA
              </div>
-             <div className="bg-white/10 backdrop-blur-md text-white text-[11px] font-black px-3 py-1 rounded-full border border-white/20 text-center">
+             {/* Badge de Porcentaje (Sustituye al texto anterior) */}
+             <div className="ml-1.5 bg-white text-gray-900 text-[13px] font-black px-2.5 py-1 rounded-lg shadow-xl border border-white/20 transform hover:scale-110 transition-transform">
                -{Math.round((1 - (parseFloat(game.precio) / parseFloat(game.precio_anterior))) * 100)}%
              </div>
            </div>
@@ -127,19 +125,30 @@ const GameCard = ({ game, token, API_URL, onShowAuth, onAddToCart, onShowDetail 
         {/* Gráfica de Historial de Precios */}
         <PriceHistoryChart gameId={game.id} API_URL={API_URL} />
         
-        <div className="mt-auto pt-5">
+        <div className="mt-auto pt-5 relative">
+          {/* Notificación Flotante (Corregido: Centrado y sin cortes) */}
           {message && (
-            <p className={`text-sm mb-2 text-center ${message.includes('Añadido') ? 'text-green-400' : 'text-red-400'}`}>
-              {message}
-            </p>
+            <div className="absolute -top-10 left-0 right-0 flex justify-center animate-bounce-in z-50 pointer-events-none">
+              <div className={`px-4 py-1.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest shadow-2xl border backdrop-blur-md whitespace-nowrap ${
+                message.includes('Añadido') 
+                  ? 'bg-green-500/90 text-white border-green-400 shadow-green-500/40' 
+                  : 'bg-red-500/90 text-white border-red-400 shadow-red-500/40'
+              }`}>
+                {message}
+              </div>
+            </div>
           )}
+          
           <button 
             onClick={handleReserve}
             disabled={loading || localStock <= 0}
             className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-semibold py-3 rounded-xl transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
           >
             {loading ? (
-              <span>Procesando...</span>
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Procesando...
+              </span>
             ) : localStock > 0 ? (
               <>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -118,6 +118,17 @@ const AuthModal = ({ onClose, onLogin, API_URL }) => {
                 )}
               </button>
             </div>
+            {isLogin && (
+              <div className="flex justify-end mt-1">
+                <button 
+                  type="button"
+                  onClick={() => setError('Por seguridad, contacta con el administrador (admin@tennostore.com) para restablecer tu contraseña.')} 
+                  className="text-[10px] text-cyan-400/70 hover:text-cyan-400 transition-colors uppercase font-bold tracking-tighter"
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
+            )}
           </div>
 
           {!isLogin && (

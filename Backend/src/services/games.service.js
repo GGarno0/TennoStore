@@ -27,7 +27,7 @@ const getPriceHistory = async (gameId) => {
   return result.rows;
 };
 
-const reserveStock = async (gameId) => {
+const reserveStock = async (gameId, userId = null, sessionId = null) => {
   const client = await pool.connect();
   
   try {
@@ -46,8 +46,16 @@ const reserveStock = async (gameId) => {
       throw new Error('Sin stock disponible');
     }
     
-    // Restar 1 unidad
+    // Restar 1 unidad en el catálogo
     await client.query('UPDATE videojuegos SET stock = stock - 1 WHERE id = $1', [gameId]);
+    
+    // Registrar la reserva en la tabla de reservaciones
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
+    
+    await client.query(
+      'INSERT INTO reservations (game_id, user_id, session_id, quantity, expires_at) VALUES ($1, $2, $3, 1, $4)',
+      [gameId, userId, sessionId, expiresAt]
+    );
     
     await client.query('COMMIT');
     
@@ -60,10 +68,56 @@ const reserveStock = async (gameId) => {
   }
 };
 
-const cancelReservation = async (gameId) => {
-  // Sumar 1 al stock porque el usuario lo sacó del carrito
-  await pool.query('UPDATE videojuegos SET stock = stock + 1 WHERE id = $1', [gameId]);
-  return { success: true, message: 'Reserva cancelada y stock devuelto.' };
+const cancelReservation = async (gameId, userId = null, sessionId = null, quantity = 1) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    
+    // Devolver stock al catálogo
+    await client.query('UPDATE videojuegos SET stock = stock + $1 WHERE id = $2', [quantity, gameId]);
+    
+    // Eliminar la reserva (o reducir cantidad si quisiéramos ser más granulares, pero aquí cancelamos la entrada)
+    if (userId) {
+      await client.query('DELETE FROM reservations WHERE game_id = $1 AND user_id = $2', [gameId, userId]);
+    } else {
+      await client.query('DELETE FROM reservations WHERE game_id = $1 AND session_id = $2', [gameId, sessionId]);
+    }
+    
+    await client.query('COMMIT');
+    return { success: true, message: `Reserva de ${quantity} unidad(es) cancelada y stock devuelto.` };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+const cleanupExpiredReservations = async () => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    
+    // Obtener las reservas expiradas
+    const result = await client.query('SELECT id, game_id, quantity FROM reservations WHERE expires_at < CURRENT_TIMESTAMP');
+    
+    for (const res of result.rows) {
+      // Devolver stock
+      await client.query('UPDATE videojuegos SET stock = stock + $1 WHERE id = $2', [res.quantity, res.game_id]);
+      // Eliminar reserva
+      await client.query('DELETE FROM reservations WHERE id = $1', [res.id]);
+    }
+    
+    await client.query('COMMIT');
+    if (result.rows.length > 0) {
+      console.log(`[Worker] Se han liberado ${result.rows.length} reservas expiradas.`);
+    }
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('[Worker] Error limpiando reservas:', error);
+  } finally {
+    client.release();
+  }
 };
 
 // Admin CRUD
@@ -158,5 +212,6 @@ module.exports = {
   createGame,
   updateGame,
   deleteGame,
-  getRecommendations
+  getRecommendations,
+  cleanupExpiredReservations
 };

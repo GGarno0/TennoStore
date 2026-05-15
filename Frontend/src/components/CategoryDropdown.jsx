@@ -48,7 +48,7 @@ const CategoryDropdown = ({ value, onChange, options }) => {
 
       {/* Menú Desplegable */}
       <div 
-        className={`absolute top-[calc(100%+0.75rem)] left-0 right-0 bg-gray-900/98 border border-gray-700/80 rounded-2xl overflow-hidden backdrop-blur-2xl z-[100] shadow-[0_25px_60px_rgba(0,0,0,0.8)] transition-all duration-500 origin-top ${
+        className={`absolute top-[calc(100%+0.75rem)] right-0 min-w-[280px] bg-gray-900/95 border border-gray-700/80 rounded-2xl overflow-hidden backdrop-blur-3xl z-[100] shadow-[0_25px_60px_rgba(0,0,0,0.9),0_0_20px_rgba(34,211,238,0.1)] transition-all duration-500 origin-top-right ${
           isOpen ? 'opacity-100 scale-100 translate-y-0 visible' : 'opacity-0 scale-95 -translate-y-4 invisible'
         }`}
       >

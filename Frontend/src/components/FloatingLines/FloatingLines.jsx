@@ -117,7 +117,7 @@ vec3 getLineColor(float t, vec3 baseColor) {
   }
 
   float m = uv.y - y;
-  return 0.0175 / max(abs(m) + 0.01, 1e-3) + 0.01;
+  return 0.004 / max(abs(m) + 0.003, 1e-3);
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {

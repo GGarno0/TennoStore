@@ -25,7 +25,7 @@ const LatestGamesCarousel = ({ games, onShowDetail }) => {
   return (
     <div className="relative mb-12 group overflow-hidden rounded-3xl border border-white/10 shadow-2xl bg-gray-900/40 backdrop-blur-md h-[300px] md:h-[450px]">
       {/* Indicador de "Novedades" */}
-      <div className="absolute top-6 left-6 z-20 bg-gradient-to-r from-purple-600 to-cyan-600 text-white text-xs font-black px-4 py-2 rounded-full shadow-lg uppercase tracking-widest animate-pulse">
+      <div className="absolute top-3 md:top-6 left-6 z-20 bg-gradient-to-r from-purple-600 to-cyan-600 text-white text-[8px] md:text-xs font-black px-3 py-1.5 md:px-4 md:py-2 rounded-full shadow-lg uppercase tracking-widest animate-pulse">
         Novedades Destacadas
       </div>
 
@@ -46,22 +46,22 @@ const LatestGamesCarousel = ({ games, onShowDetail }) => {
               style={{ backgroundImage: `url(${game.imagen_url || 'https://via.placeholder.com/800x450'})` }}
             />
             
-            <div className="relative h-full flex flex-col md:flex-row items-center justify-between p-8 md:p-16 gap-8">
+            <div className="relative h-full flex flex-col md:flex-row items-center justify-center md:justify-between p-6 pt-14 md:pt-16 md:p-16 gap-4 md:gap-8">
               {/* Contenido Texto */}
-              <div className="flex-1 text-center md:text-left z-10">
-                <h3 className="text-3xl md:text-5xl font-black text-white mb-4 drop-shadow-lg uppercase tracking-tighter">
+              <div className="flex-1 text-center md:text-left z-10 w-full">
+                <h3 className="text-xl sm:text-2xl md:text-5xl font-black text-white mb-2 md:mb-4 drop-shadow-lg uppercase tracking-tighter leading-tight line-clamp-2 md:line-clamp-none">
                   {game.titulo}
                 </h3>
-                <p className="text-cyan-400 text-lg font-bold mb-6 flex items-center justify-center md:justify-start gap-2">
-                  <span className="bg-cyan-500/20 px-3 py-1 rounded-lg border border-cyan-500/30">
+                <p className="text-cyan-400 text-sm md:text-lg font-bold mb-4 md:mb-6 flex items-center justify-center md:justify-start gap-2">
+                  <span className="bg-cyan-500/20 px-2 py-0.5 md:px-3 md:py-1 rounded-lg border border-cyan-500/30">
                     {game.categoria}
                   </span>
                   <span className="text-white/50">•</span>
-                  <span className="text-2xl text-white">{game.precio}€</span>
+                  <span className="text-xl md:text-2xl text-white">{game.precio}€</span>
                 </p>
                 <button
                   onClick={() => onShowDetail(game)}
-                  className="bg-white text-gray-900 px-8 py-3 rounded-xl font-black hover:bg-cyan-400 transition-all transform hover:scale-105 shadow-xl uppercase text-sm"
+                  className="bg-white text-gray-900 px-6 py-2 md:px-8 md:py-3 rounded-xl font-black hover:bg-cyan-400 transition-all transform hover:scale-105 shadow-xl uppercase text-[10px] md:text-sm"
                 >
                   Ver Detalles
                 </button>

@@ -35,14 +35,15 @@ const getHistory = async (req, res) => {
 };
 
 const reserveStock = async (req, res) => {
-  const { gameId } = req.body;
+  const { gameId, sessionId } = req.body;
+  const userId = req.user?.id; // Si está autenticado
   
   if (!gameId) {
     return res.status(400).json({ error: 'Falta el gameId en el cuerpo de la petición' });
   }
 
   try {
-    const result = await gamesService.reserveStock(gameId);
+    const result = await gamesService.reserveStock(gameId, userId, sessionId);
     res.json(result);
   } catch (err) {
     console.error('Error al reservar stock:', err.message);
@@ -51,14 +52,15 @@ const reserveStock = async (req, res) => {
 };
 
 const cancelReservation = async (req, res) => {
-  const { gameId } = req.body;
+  const { gameId, quantity, sessionId } = req.body;
+  const userId = req.user?.id;
   
   if (!gameId) {
     return res.status(400).json({ error: 'Falta el gameId en el cuerpo de la petición' });
   }
 
   try {
-    const result = await gamesService.cancelReservation(gameId);
+    const result = await gamesService.cancelReservation(gameId, userId, sessionId, quantity || 1);
     res.json(result);
   } catch (err) {
     console.error('Error al cancelar reserva:', err.message);

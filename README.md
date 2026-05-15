@@ -53,5 +53,3 @@ El proyecto utiliza una arquitectura de capas bien definida:
 
 ---
 
-## Mantenimiento y Auditoría
-Para detalles sobre la ejecución de pruebas y procedimientos de respaldo, consulte la [Bitácora Técnica](./docs/BITACORA_TECNICA.md) y el [Manual de Operaciones](./OPERACIONES.md).
