@@ -12,6 +12,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Health check / root route
+app.get('/', (req, res) => {
+  res.json({ message: 'TennoStore API is running' });
+});
+
 // Routes
 app.use('/api/games', gamesRoutes);
 app.use('/api/auth', authRoutes);
