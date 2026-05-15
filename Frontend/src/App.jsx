@@ -13,7 +13,7 @@ import Footer from './components/Footer';
 import Header from './components/Header';
 import FilterBar from './components/FilterBar';
 
-// Configuración estática
+// Configuración del fondo animado
 const BG_GRADIENT = ['#A855F7', '#22D3EE', '#FFFFFF'];
 const BG_WAVES = ['top', 'middle', 'bottom'];
 const BG_LINE_COUNT = [10, 15, 20];
@@ -25,12 +25,12 @@ function App() {
   const [scrolled, setScrolled] = useState(false);
   const [currentView, setCurrentView] = useState('store');
   
-  // Auth state
+  // Estado global de la app
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // Session ID para invitados (C1.1 Backend sync)
+  // Generar un ID temporal para usuarios sin registrar
   const [sessionId] = useState(() => {
     let id = localStorage.getItem('session_id');
     if (!id) {
@@ -40,7 +40,7 @@ function App() {
     return id;
   });
 
-  // Cart state - Independiente por usuario
+  // Gestionamos el carrito separando usuarios registrados de invitados
   const getCartKey = (u) => u ? `cart_${u.id}` : 'cart_guest';
   const [cart, setCart] = useState(() => {
     const currentUser = JSON.parse(localStorage.getItem('user'));
@@ -57,7 +57,7 @@ function App() {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [showOnlyOffers, setShowOnlyOffers] = useState(false);
 
-  // Sincronizar selectedGame con el catálogo global (por si cambia el stock tras reservar/cancelar)
+  // Mantiene la ficha del juego actualizada si cambia el stock general
   useEffect(() => {
     if (selectedGame) {
       const updatedGame = games.find(g => g.id === selectedGame.id);
@@ -67,7 +67,7 @@ function App() {
     }
   }, [games]);
 
-  // Search and Filter state
+  // Filtros de búsqueda
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [selectedPlatform, setSelectedPlatform] = useState('Todas');
@@ -75,7 +75,7 @@ function App() {
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-  // Sincronización de localStorage
+  // Efectos para guardar el carrito y el token
   useEffect(() => {
     const savedCart = localStorage.getItem(getCartKey(user));
     setCart(savedCart ? JSON.parse(savedCart) : []);
@@ -85,7 +85,7 @@ function App() {
     localStorage.setItem(getCartKey(user), JSON.stringify(cart));
   }, [cart, user?.id]);
 
-  // Gestión del tiempo de expiración del carrito
+  // Comprobador periódico de carritos caducados (10 min)
   useEffect(() => {
     const checkExpiration = () => {
       if (cart.length === 0) return;
@@ -95,10 +95,10 @@ function App() {
       const expiredItems = cart.filter(item => (now - item.addedAt) >= expirationTime);
       
       if (expiredItems.length > 0) {
-        // En lugar de llamar a handleRemoveFromCart (que crea múltiples renders),
-        // eliminamos del carrito y refrescamos los juegos globalmente
+        // Limpiamos los productos que lleven más de 10 min
+        // y recargamos el catálogo para ver el stock actualizado
         setCart(prev => prev.filter(item => (now - item.addedAt) < expirationTime));
-        fetchGames(); // Refrescar stock (el backend ya habrá liberado el stock por su cuenta tras los 10 mins)
+        fetchGames(); // Refrescamos el catálogo para ver los juegos devueltos
         notify('Los artículos de tu carrito han expirado y el stock se ha liberado.', 'error');
       }
     };
@@ -167,7 +167,7 @@ function App() {
       return [...prev, { ...game, quantity: 1, addedAt: Date.now() }];
     });
 
-    // Sincronización optimista para que GameCard y GameDetailModal se actualicen al instante
+    // Actualizamos el stock visualmente al instante
     setGames(prevGames => prevGames.map(g => 
       g.id === game.id ? { ...g, stock: Math.max(0, g.stock - 1) } : g
     ));
@@ -207,7 +207,7 @@ function App() {
     if (!item) return;
 
     try {
-      // Liberación masiva (Bulk release) - Corrección del bucle ineficiente
+      // Liberamos todo el stock del juego de golpe
       const res = await fetch(`${API_URL}/api/games/cancel-reservation`, {
         method: 'POST',
         headers: {
@@ -257,7 +257,7 @@ function App() {
     }
   };
 
-  // Lógica de filtrado
+  // Buscador y filtros combinados
   const filteredGames = useMemo(() => {
     return games
       .filter(game => {

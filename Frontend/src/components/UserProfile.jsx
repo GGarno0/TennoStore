@@ -44,7 +44,7 @@ const UserProfile = ({ user, token, API_URL, onLogout, onUpdateUser, onGoBack })
       if (res.ok) {
         const data = await res.json();
         onUpdateUser(data.user);
-        setPassword(''); // Limpiar campo de contraseña
+        setPassword(''); // Vaciamos la contraseña por seguridad
         setMessage({ text: '¡Perfil actualizado con éxito!', type: 'success' });
       } else {
         const data = await res.json();
@@ -54,7 +54,7 @@ const UserProfile = ({ user, token, API_URL, onLogout, onUpdateUser, onGoBack })
       setMessage({ text: err.message, type: 'error' });
     } finally {
       setLoading(false);
-      // Limpiar mensaje tras 5 segundos
+      // Quitamos el aviso a los 5 segundos
       setTimeout(() => setMessage({ text: '', type: '' }), 5000);
     }
   };
@@ -76,7 +76,7 @@ const UserProfile = ({ user, token, API_URL, onLogout, onUpdateUser, onGoBack })
   const handleExportPDF = () => {
     const printWindow = window.open('', '_blank');
     const ordersHtml = orders.map((o, index) => {
-      // Formatear los items del pedido para el PDF
+      // Montamos la lista de juegos para el PDF
       const itemsList = o.items && o.items.length > 0 
         ? o.items.map(item => `${item.titulo} (x${item.cantidad})`).join('<br>')
         : '<span style="color: #999;">Sin detalles</span>';
@@ -100,7 +100,7 @@ const UserProfile = ({ user, token, API_URL, onLogout, onUpdateUser, onGoBack })
             body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b; padding: 40px; }
             .header { border-bottom: 3px solid #7c3aed; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
             .logo { font-size: 28px; font-weight: 900; color: #7c3aed; text-transform: uppercase; letter-spacing: -1px; }
-            .info { margin-bottom: 40px; background: #f8fafc; padding: 20px; rounded: 15px; border-left: 5px solid #22d3ee; }
+            .info { margin-bottom: 40px; background: #f8fafc; padding: 20px; border-radius: 15px; border-left: 5px solid #22d3ee; }
             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
             th { text-align: left; background: #1e293b; color: white; padding: 12px; font-size: 12px; text-transform: uppercase; }
             .footer { margin-top: 60px; font-size: 10px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 20px; }

@@ -15,7 +15,7 @@ const PaymentModal = ({ isOpen, onClose, total, onPaymentSuccess }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    // Simple masking/formatting could be added here
+    // Aquí se podría meter un formateador de tarjeta si hiciera falta
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -46,7 +46,7 @@ const PaymentModal = ({ isOpen, onClose, total, onPaymentSuccess }) => {
     }
 
     setLoading(true);
-    // Simular retraso de red
+    // Simulamos que el banco tarda un poco en responder
     setTimeout(() => {
       setLoading(false);
       onPaymentSuccess();

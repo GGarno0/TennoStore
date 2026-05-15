@@ -38,7 +38,7 @@ const Header = ({
           </h1>
         </div>
 
-        {/* Central Search/Filter */}
+        {/* Buscador central */}
         <div className="hidden md:block absolute left-1/2 -translate-x-1/2">
           {currentView === 'store' && (
             <div className="flex items-center gap-2 bg-gray-800/50 p-1.5 rounded-2xl border border-white/5 backdrop-blur-md animate-fade-in shadow-xl shadow-black/20">
@@ -102,7 +102,7 @@ const Header = ({
           )}
         </div>
 
-        {/* User Actions */}
+        {/* Botones de usuario */}
         <div className="flex items-center gap-1 md:gap-4 z-10">
           {/* Soporte 24/7 */}
           <button 

@@ -4,21 +4,10 @@ const gamesService = require('../services/games.service');
 const getGames = async (req, res) => {
   try {
     const games = await gamesService.getGames();
-    
-    if (games && games.length > 0) {
-      return res.json(games);
-    }
-    
-    // Datos de prueba por si la base de datos está vacía (fallback opcional)
-    const testGames = [
-      { id: 1, titulo: 'The Legend of Zelda', precio: 59.99, stock: 10, categoria: 'Aventura' },
-      { id: 2, titulo: 'Elden Ring', precio: 49.99, stock: 5, categoria: 'RPG' },
-      { id: 3, titulo: 'Cyberpunk 2077', precio: 29.99, stock: 20, categoria: 'Acción' }
-    ];
-    res.json(testGames);
+    res.json(games || []);
   } catch (err) {
     console.error('Error al consultar la BD:', err);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    res.status(500).json({ error: 'Error al obtener los juegos' });
   }
 };
 
@@ -36,7 +25,7 @@ const getHistory = async (req, res) => {
 
 const reserveStock = async (req, res) => {
   const { gameId, sessionId } = req.body;
-  const userId = req.user?.id; // Si está autenticado
+  const userId = req.user?.id; // Miramos si esta logueado
   
   if (!gameId) {
     return res.status(400).json({ error: 'Falta el gameId en el cuerpo de la petición' });
@@ -68,14 +57,14 @@ const cancelReservation = async (req, res) => {
   }
 };
 
-// Registro de nuevo juego con validación básica
+// Añadir juego nuevo
 const createGame = async (req, res) => {
   const { titulo, precio, stock, categoria, plataforma, imagen_url } = req.body;
   
   if (!titulo || precio === undefined || stock === undefined) {
     return res.status(400).json({ error: 'Faltan datos obligatorios' });
   }
-  // Evitamos datos inconsistentes en la DB
+  // No permitimos valores negativos
   if (parseFloat(precio) < 0 || parseInt(stock) < 0) {
     return res.status(400).json({ error: 'El precio y el stock no pueden ser negativos' });
   }
@@ -101,7 +90,7 @@ const updateGame = async (req, res) => {
     return res.status(400).json({ error: 'El stock no puede ser negativo' });
   }
   
-  // Actualización de producto existente
+  // Guardamos los cambios
   try {
     const game = await gamesService.updateGame(id, titulo, precio, stock, categoria, plataforma, imagen_url);
     res.json(game);

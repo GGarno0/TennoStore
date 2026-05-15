@@ -54,7 +54,7 @@ const login = async (req, res) => {
 
 const getMe = async (req, res) => {
   try {
-    // req.user viene del middleware verifyToken
+    // Pillamos el usuario usando el ID que viene en el token
     const user = await authService.getUserById(req.user.id);
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
     

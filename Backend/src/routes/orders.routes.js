@@ -11,7 +11,7 @@ router.post('/', verifyToken, async (req, res) => {
   try {
     await client.query('BEGIN');
     
-    // Crear el pedido principal
+    // Creamos el pedido principal
     const orderRes = await client.query(
       'INSERT INTO orders (user_id, total) VALUES ($1, $2) RETURNING id',
       [userId, total]
@@ -25,13 +25,16 @@ router.post('/', verifyToken, async (req, res) => {
         [orderId, item.id, item.quantity, item.precio]
       );
     }
+
+    // ELIMINAR RESERVAS: Crucial para que el worker no devuelva el stock de algo ya pagado
+    await client.query('DELETE FROM reservations WHERE user_id = $1', [userId]);
     
     await client.query('COMMIT');
 
     res.status(201).json({ 
       success: true, 
       orderId,
-      message: 'Pedido y detalles guardados correctamente.' 
+      message: 'Pedido guardado.' 
     });
   } catch (err) {
     await client.query('ROLLBACK');
@@ -44,7 +47,7 @@ router.post('/', verifyToken, async (req, res) => {
 
 router.get('/my-orders', verifyToken, async (req, res) => {
   try {
-    // Consulta robusta: LEFT JOIN para no perder pedidos antiguos y filtrado de nulos en el agregador
+    // Sacamos los pedidos con sus juegos usando un join
     const query = `
       SELECT o.*, 
              COALESCE(

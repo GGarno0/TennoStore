@@ -6,7 +6,7 @@ const GameCard = ({ game, token, API_URL, onShowAuth, onAddToCart, onShowDetail 
   const [message, setMessage] = useState('');
   const [localStock, setLocalStock] = useState(game.stock);
 
-  // Sincronizar stock si se actualiza desde el padre (ej. al cancelar reserva)
+  // Mantiene el stock del botón alineado con el carrito
   useEffect(() => {
     setLocalStock(game.stock);
   }, [game.stock]);
@@ -39,14 +39,14 @@ const GameCard = ({ game, token, API_URL, onShowAuth, onAddToCart, onShowDetail 
       setMessage('¡Añadido al carrito!');
       setLocalStock(prev => prev - 1);
       
-      // Añadir al estado del carrito en React
+      // Lo mandamos al estado global
       onAddToCart(game);
       
     } catch (err) {
       setMessage(err.message);
     } finally {
       setLoading(false);
-      // Limpiar mensaje tras 3 segundos
+      // Quitamos la alerta después de 3 segundos
       setTimeout(() => setMessage(''), 3000);
     }
   };
@@ -59,12 +59,12 @@ const GameCard = ({ game, token, API_URL, onShowAuth, onAddToCart, onShowDetail 
         onClick={() => onShowDetail(game)}
       >
          <img 
-            src={game.imagen_url || `https://picsum.photos/seed/${game.id}/400/300`} 
+            src={game.imagen_url || `https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=400&h=300`} 
             alt={game.titulo}
             className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:brightness-110 transition-all duration-700 group-hover:scale-110"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = `https://picsum.photos/seed/${game.id}/400/300`;
+              e.target.src = `https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=400&h=300`;
             }}
          />
          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent"></div>
@@ -72,14 +72,14 @@ const GameCard = ({ game, token, API_URL, onShowAuth, onAddToCart, onShowDetail 
             {game.titulo.substring(0, 2).toUpperCase()}
          </span>
          
-         {/* Sistema de Ofertas Mejorado */}
+         {/* Etiqueta de oferta visual */}
          {game.precio_anterior && (
            <div className="absolute top-4 -left-1.5 z-20 flex flex-col gap-1 items-start">
              {/* Etiqueta que sobresale */}
              <div className="bg-red-600 text-white text-[9px] font-black px-3 py-1.5 rounded-r-lg shadow-[4px_4px_15px_rgba(220,38,38,0.4)] border-l-4 border-red-800 uppercase tracking-tighter animate-pulse">
                OFERTA
              </div>
-             {/* Badge de Porcentaje (Sustituye al texto anterior) */}
+             {/* Calculamos el % de descuento al vuelo */}
              <div className="ml-1.5 bg-white text-gray-900 text-[13px] font-black px-2.5 py-1 rounded-lg shadow-xl border border-white/20 transform hover:scale-110 transition-transform">
                -{Math.round((1 - (parseFloat(game.precio) / parseFloat(game.precio_anterior))) * 100)}%
              </div>

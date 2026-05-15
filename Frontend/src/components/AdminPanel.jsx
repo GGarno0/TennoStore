@@ -6,10 +6,10 @@ const AdminPanel = ({ token, API_URL, onGoBack }) => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('inventory'); // 'inventory' o 'users'
   
-  // Estado del formulario Juegos
+  // Datos del formulario de juegos
   const [formData, setFormData] = useState({ id: null, titulo: '', precio: '', stock: '', categoria: '', plataforma: 'PC', imagen_url: '' });
   
-  // Estado Usuarios
+  // Datos de usuarios
   const [users, setUsers] = useState([]);
   const [userFormData, setUserFormData] = useState({ id: null, username: '', email: '', is_admin: false });
   
@@ -23,8 +23,8 @@ const AdminPanel = ({ token, API_URL, onGoBack }) => {
     setConfirmConfig({ isOpen: true, title, message, onConfirm });
   };
 
-  // Defensa en profundidad: Verificar si es admin antes de renderizar nada (RF11)
-  // Seguridad extra: Validamos el rol directamente desde el JWT decodificado
+  // Comprobamos si el usuario es administrador
+  // Leemos el rol desde el token JWT
   const isAdmin = () => {
     if (!token) return false;
     try {

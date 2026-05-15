@@ -7,7 +7,7 @@ const CartModal = ({ isOpen, onClose, cart, onRemoveFromCart, onUpdateQuantity, 
   useEffect(() => {
     if (!isOpen) return;
 
-    // Actualizar 'now' inmediatamente al abrir para evitar desfases
+    // Refrescamos el tiempo al abrir para que el contador no salte
     setNow(Date.now());
 
     const timer = setInterval(() => {
@@ -22,7 +22,7 @@ const CartModal = ({ isOpen, onClose, cart, onRemoveFromCart, onUpdateQuantity, 
   const total = cart.reduce((sum, item) => sum + (parseFloat(item.precio) * item.quantity), 0);
 
   const formatTime = (addedAt) => {
-    const limit = 10 * 60 * 1000; // 10 minutos
+    const limit = 10 * 60 * 1000; // El tiempo limite son 10 minutos
     const elapsed = now - addedAt;
     const remaining = Math.max(0, limit - elapsed);
     
@@ -36,7 +36,7 @@ const CartModal = ({ isOpen, onClose, cart, onRemoveFromCart, onUpdateQuantity, 
     <div className="fixed inset-0 bg-black/80 flex justify-end z-50 backdrop-blur-sm transition-opacity">
       <div className="bg-gray-900 w-full md:max-w-md h-full shadow-2xl flex flex-col border-l border-gray-700 animate-slide-in-right">
         
-        {/* Cabecera del carrito */}
+        {/* Arriba del carrito */}
         <div className="p-4 md:p-6 border-b border-gray-800 flex justify-between items-center bg-gray-900 sticky top-0">
           <div className="flex items-center gap-3">
             <svg className="w-5 h-5 md:w-6 md:h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,7 +54,7 @@ const CartModal = ({ isOpen, onClose, cart, onRemoveFromCart, onUpdateQuantity, 
           </button>
         </div>
 
-        {/* Lista de productos */}
+        {/* Listado de juegos en el carrito */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6">
           {cart.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 space-y-4">
@@ -92,7 +92,7 @@ const CartModal = ({ isOpen, onClose, cart, onRemoveFromCart, onUpdateQuantity, 
                     </button>
                   </div>
                   
-                  {/* Control de Cantidad */}
+                  {/* Botones para sumar o restar unidades */}
                   <div className="flex items-center gap-4 bg-gray-900/80 w-fit px-3 py-2 rounded-xl border border-white/5 shadow-inner">
                     <button 
                       onClick={() => onUpdateQuantity(item.id, -1)}

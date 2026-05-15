@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 const LatestGamesCarousel = ({ games, onShowDetail }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Obtener los últimos 5 juegos añadidos (asumiendo que IDs más altos son más recientes)
+  // Pillamos los 5 juegos más nuevos por ID
   const latestGames = [...games]
     .sort((a, b) => b.id - a.id)
     .slice(0, 5);
@@ -40,10 +40,10 @@ const LatestGamesCarousel = ({ games, onShowDetail }) => {
                 : 'opacity-0 scale-110 translate-x-full'
             }`}
           >
-            {/* Imagen de fondo desenfocada */}
+            {/* Fondo con blur para que quede guapo */}
             <div 
               className="absolute inset-0 bg-cover bg-center scale-110 blur-2xl opacity-30"
-              style={{ backgroundImage: `url(${game.imagen_url || 'https://via.placeholder.com/800x450'})` }}
+              style={{ backgroundImage: `url(${game.imagen_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=800&h=450'})` }}
             />
             
             <div className="relative h-full flex flex-col md:flex-row items-center justify-center md:justify-between p-6 pt-14 md:pt-16 md:p-16 gap-4 md:gap-8">
@@ -70,7 +70,7 @@ const LatestGamesCarousel = ({ games, onShowDetail }) => {
               {/* Imagen Carátula */}
               <div className="flex-shrink-0 z-10">
                 <img
-                  src={game.imagen_url || 'https://via.placeholder.com/300x450'}
+                  src={game.imagen_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=300&h=450'}
                   alt={game.titulo}
                   className="h-48 md:h-80 w-auto rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border-4 border-white/10 transform rotate-3 group-hover:rotate-0 transition-transform duration-500 cursor-pointer"
                   onClick={() => onShowDetail(game)}

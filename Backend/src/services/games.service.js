@@ -18,7 +18,7 @@ const getGames = async () => {
   return result.rows;
 };
 
-// Obtener historial de precios (RF04)
+// Sacamos el historial de precios
 const getPriceHistory = async (gameId) => {
   const result = await pool.query(
     'SELECT precio, fecha FROM price_history WHERE game_id = $1 ORDER BY fecha ASC', 
@@ -31,9 +31,9 @@ const reserveStock = async (gameId, userId = null, sessionId = null) => {
   const client = await pool.connect();
   
   try {
-    await client.query('BEGIN'); // Transacción ACID para asegurar consistencia de stock
+    await client.query('BEGIN'); // Transacción para asegurar la bbdd
     
-    // Bloqueo de fila para evitar condiciones de carrera (Race Conditions)
+    // Bloqueamos la fila entera para evitar lios de concurrencia
     const result = await client.query('SELECT stock FROM videojuegos WHERE id = $1 FOR UPDATE', [gameId]);
     
     if (result.rows.length === 0) {
@@ -49,7 +49,7 @@ const reserveStock = async (gameId, userId = null, sessionId = null) => {
     // Restar 1 unidad en el catálogo
     await client.query('UPDATE videojuegos SET stock = stock - 1 WHERE id = $1', [gameId]);
     
-    // Registrar la reserva en la tabla de reservaciones
+    // Apuntamos la reserva en la bbdd
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
     
     await client.query(
@@ -76,7 +76,7 @@ const cancelReservation = async (gameId, userId = null, sessionId = null, quanti
     // Devolver stock al catálogo
     await client.query('UPDATE videojuegos SET stock = stock + $1 WHERE id = $2', [quantity, gameId]);
     
-    // Eliminar la reserva (o reducir cantidad si quisiéramos ser más granulares, pero aquí cancelamos la entrada)
+    // Borramos la reserva del tiron
     if (userId) {
       await client.query('DELETE FROM reservations WHERE game_id = $1 AND user_id = $2', [gameId, userId]);
     } else {
@@ -98,20 +98,17 @@ const cleanupExpiredReservations = async () => {
   try {
     await client.query('BEGIN');
     
-    // Obtener las reservas expiradas
+    // Buscamos los carritos caducados
     const result = await client.query('SELECT id, game_id, quantity FROM reservations WHERE expires_at < CURRENT_TIMESTAMP');
     
     for (const res of result.rows) {
-      // Devolver stock
+      // Devolvemos el juego a la tienda
       await client.query('UPDATE videojuegos SET stock = stock + $1 WHERE id = $2', [res.quantity, res.game_id]);
       // Eliminar reserva
       await client.query('DELETE FROM reservations WHERE id = $1', [res.id]);
     }
     
     await client.query('COMMIT');
-    if (result.rows.length > 0) {
-      console.log(`[Worker] Se han liberado ${result.rows.length} reservas expiradas.`);
-    }
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('[Worker] Error limpiando reservas:', error);
@@ -131,7 +128,7 @@ const createGame = async (titulo, precio, stock, categoria, plataforma, imagen_u
     );
     const newGame = result.rows[0];
     
-    // Crear entrada inicial en historial de precios
+    // Guardamos el precio inicial para las graficas
     await client.query(
       'INSERT INTO price_history (game_id, precio, fecha) VALUES ($1, $2, CURRENT_DATE)',
       [newGame.id, precio]
@@ -162,7 +159,7 @@ const updateGame = async (id, titulo, precio, stock, categoria, plataforma, imag
     );
     const updatedGame = result.rows[0];
 
-    // Registro histórico si detectamos cambio de precio (C10)
+    // Si le cambian el precio, lo apuntamos en el historial
     if (parseFloat(oldPrice) !== parseFloat(precio)) {
       const historyCheck = await client.query('SELECT 1 FROM price_history WHERE game_id = $1 LIMIT 1', [id]);
       if (historyCheck.rows.length === 0) {
@@ -193,7 +190,7 @@ const deleteGame = async (id) => {
 };
 
 const getRecommendations = async (id) => {
-  // Buscamos juegos de la misma categoría, excluyendo el juego actual
+  // Sacamos otros juegos del mismo género
   const query = `
     SELECT * FROM videojuegos 
     WHERE categoria = (SELECT categoria FROM videojuegos WHERE id = $1)

@@ -53,7 +53,7 @@ const GameDetailModal = ({ game, isOpen, onClose, onAddToCart, onSelectGame, onS
       setMessage('¡Añadido al carrito!');
       onAddToCart(game);
       
-      // Cerrar el modal poco después para que se vea el mensaje (o instantáneo)
+      // Esperamos un momento para que lea el mensaje
       setTimeout(() => {
         onClose();
         setMessage('');
@@ -73,10 +73,10 @@ const GameDetailModal = ({ game, isOpen, onClose, onAddToCart, onSelectGame, onS
     <div className="fixed inset-0 bg-black/90 flex items-start md:items-center justify-center z-[70] backdrop-blur-xl p-0 md:p-4 overflow-y-auto">
       <div className="bg-gray-900 w-full max-w-4xl rounded-none md:rounded-3xl border-x md:border border-gray-700 shadow-2xl animate-scale-up md:my-8 relative">
         
-        {/* Cabecera con Diseño de Respaldo (CSS) */}
+        {/* Cabecera de la ficha */}
         <div className="relative h-48 sm:h-64 md:h-80 overflow-hidden rounded-t-none md:rounded-t-3xl bg-gradient-to-br from-purple-800 via-gray-900 to-cyan-900 flex items-center justify-center">
           
-          {/* Tipografía de fondo (estilo moderno) */}
+          {/* Letras gigantes de fondo */}
           <span className="absolute text-[12rem] font-black text-white/5 select-none tracking-tighter">
             TENNO
           </span>
@@ -102,7 +102,7 @@ const GameDetailModal = ({ game, isOpen, onClose, onAddToCart, onSelectGame, onS
           </button>
           
           <div className="absolute top-4 -left-1.5 z-50 flex flex-col gap-1 items-start">
-             {/* Etiqueta de Oferta (Ribbon) */}
+             {/* Cartelito de descuento */}
              {game.precio_anterior && (
                <>
                  <div className="bg-red-600 text-white text-[11px] md:text-xs font-black px-4 py-2 rounded-r-xl shadow-[5px_5px_20px_rgba(220,38,38,0.5)] border-l-4 border-red-800 uppercase tracking-widest animate-pulse">
@@ -132,7 +132,7 @@ const GameDetailModal = ({ game, isOpen, onClose, onAddToCart, onSelectGame, onS
 
         <div className="p-4 sm:p-8 grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           
-          {/* Columna Izquierda: Info y Compra */}
+          {/* Parte izquierda: Detalles y botón */}
           <div className="lg:col-span-1 space-y-6">
 
             <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
@@ -185,10 +185,10 @@ const GameDetailModal = ({ game, isOpen, onClose, onAddToCart, onSelectGame, onS
             </div>
           </div>
 
-          {/* Columna Derecha: Gráfico y Recomendaciones */}
+          {/* Parte derecha: Gráfica y sugerencias */}
           <div className="lg:col-span-2 space-y-8">
             
-            {/* Gráfico de Evolución */}
+            {/* Gráfica de precios historicos */}
             <div className="bg-gray-800/30 p-6 rounded-2xl border border-gray-700">
               <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                 <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
@@ -197,7 +197,7 @@ const GameDetailModal = ({ game, isOpen, onClose, onAddToCart, onSelectGame, onS
               <PriceHistoryChart gameId={game.id} API_URL={API_URL} />
             </div>
 
-            {/* RECOMENDADOR (Opción A) */}
+            {/* Juegos similares */}
             <div>
               <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                 <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
