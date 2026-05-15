@@ -9,12 +9,13 @@ const adminRoutes = require('./routes/admin.routes');
 const app = express();
 
 // Middleware
-const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+// Configuración de CORS permisiva para despliegue
+app.use(cors({
+  origin: true,
   credentials: true,
-  optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Health check / root route
